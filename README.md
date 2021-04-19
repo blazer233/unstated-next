@@ -87,7 +87,7 @@ export default useHook => {
 
 ## 如何解决 Provider hell 🏁
 
-在 unstated-next 中由于每一个被处理为 **数据对象** 的组件想要被共享，都需要在最外层逐级包裹
+在 unstated-next 中每一个被处理为 **数据对象** 的组件如果想要被共享，需要在最外层逐级包裹
 
 ```javascript
 <Container1.Provider>
