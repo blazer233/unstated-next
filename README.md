@@ -127,7 +127,11 @@ export default () => (
 
 其实 unstated-next 实现很简单，通俗来讲就是一个闭包，使用于简单的业务场景，且写法过于灵活，一旦遇到 class 组件的情况，就又要回到旧的写法，所以只能说有利有弊
 
-至此，谢谢各位在百忙之中点开这篇文章，希望对你们能有所帮助，相信你对 react 中的错误边界有了大概的认实，也会编写一个简单的`ErrorBoundary`总的来说优化的点还有很多，如有问题欢迎各位大佬指正。
+至此，谢谢各位在百忙之中点开这篇文章，希望对你们能有所帮助，相信你对 unstated-next 有了大概的认实，如有问题欢迎各位大佬指正。
+
+欢迎添加我的微信共同讨论前端技术问题（备注：qian）
+
+![Alt](<https://raw.githubusercontent.com/blazer233/unstated-next/main/public/1618833127(1).png>)
 
 - 👋：[跳转 github](https://github.com/blazer233/unstated-next)
 
