@@ -1,47 +1,35 @@
-import React from "react";
-import CounterPage from "./page/counter";
-import TodoListPage from "./page/todolist";
-import CounterContainer from "./state/CounterContainer";
-import TodoListContainer from "./state/TodoListContainer";
+import React, { useState } from "react";
+import { unstated, reduceProvider } from "./unstated-next";
 
-// function compose(...containers) {
-//   return function Component(props) {
-//     console.log(props);
-//     return containers.reduceRight((children, Container) => {
-//       console.log(children, Container, props.children);
-//       return <Container.Provider>{children}</Container.Provider>;
-//     }, props.children);
-//   };
-// }
-// let Provider = compose(CounterContainer, TodoListContainer);
-// // 放在顶层
-// export default () => {
-//   return (
-//     <Provider>
-//       <CounterPage />
-//       <TodoListPage />
-//     </Provider>
-//   );
-// };
-/**
- * 相当于：
- * <CounterContainer.Provider>
- *  <TodoListContainer.Provider>
-     <xxx.Provider>
-         MyApp
-     </xxx.Provider>
- *  </TodoListContainer.Provider>
- * </CounterContainer.Provider>
- */
+function useCounter(initialState = 0) {
+  let [count, setCount] = useState(initialState);
+  let decrement = () => setCount(count - 1);
+  let increment = () => setCount(count + 1);
+  return { count, decrement, increment };
+}
 
-//嵌套数据多层应用
+let Counter = unstated(useCounter);
+
+function CounterDisplay() {
+  let counter = Counter.useContainer();
+  return (
+    <div>
+      <button onClick={counter.decrement}>-</button>
+      <span>{counter.count}</span>
+      <button onClick={counter.increment}>+</button>
+    </div>
+  );
+}
+
+const Provider = reduceProvider({ ...Counter, init: 100 });
 export default () => (
-  <div>
-    <CounterContainer.Provider>
-      <CounterPage />
-      <TodoListContainer.Provider>
-        <TodoListPage />
-      </TodoListContainer.Provider>
-    </CounterContainer.Provider>
-  </div>
+  <Provider>
+    <CounterDisplay />
+  </Provider>
 );
+//Provider hell
+// export default () => (
+//   <Counter.Provider>
+//     <CounterDisplay />
+//   </Counter.Provider>
+// );

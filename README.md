@@ -1,46 +1,141 @@
-# Getting Started with Create React App
+# 不到 20 行仿写一个 unstated-next 🎅
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 前言 📝
 
-## Available Scripts
+> 👉 [unstated-next](https://github.com/jamiebuilds/unstated-next) 基于 React 心智模型(hook+context)而设计的状态管理。 👈
 
-In the project directory, you can run:
+![Alt](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/914cba218a7e415eafc5feddcf9454dc~tplv-k3u1fbpfcp-zoom-1.image)
 
-### `yarn start`
+在 react hook 出现之前，有基于单一数据源，使用纯函数修改状态的 redux & react-redux 也有基于 Object.defineProperty 和 Proxy 来进行数据拦截访问的 mobx ，但伴随着 react 16.8 的出现，我们可以基于自带的 hook 去实现状态管理也就是 unstated-next
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+---
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 官网 Demo 🥔
 
-### `yarn test`
+```javascript
+...
+import { createContainer } from "unstated-next";
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+function useCounter(initialState = 0) {
+  let [count, setCount] = useState(initialState);
+  let decrement = () => setCount(count - 1);
+  let increment = () => setCount(count + 1);
+  return { count, decrement, increment };
+}
 
-### `yarn build`
+//使用 createContainer 将 useCounter改造成提供状态和方法的组件
+let Counter = createContainer(useCounter);
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+function CounterDisplay() {
+//从被处理过的 useCounter 中拿到状态和方法
+  let counter = Counter.useContainer();
+  return (
+    <div>
+      <button onClick={counter.decrement}>-</button>
+      <span>{counter.count}</span>
+      <button onClick={counter.increment}>+</button>
+    </div>
+  );
+}
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+function App() {
+  return (
+    <Counter.Provider>
+      <CounterDisplay />
+      {/* 通过initialState属性注入初始值 */}
+      <Counter.Provider initialState={2}>
+            <CounterDisplay />
+      </Counter.Provider>
+    </Counter.Provider>
+  );
+}
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+render(<App />, document.getElementById("root"));
+```
 
-### `yarn eject`
+unstated-next 做了什么？
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1. 提供 createContainer 将自定义 Hooks 封装为一个可以提供状态和方法的 **数据对象**
+2. 利用 useContext 构造了 `Provider 注入` 和 `组件获取获取 Store` 这两个方法
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 实现一个 unstated-next 🚲
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```javascript
+import { createContext, createElement, useContext } from "react";
+export default useHook => {
+  const Context = createContext();
+  const Provider = ({ init, children }) => {
+    return createElement(Context.Provider, { value: useHook(init) }, children);
+  };
+  const useContainer = () => useContext(Context);
+  return { Provider, useContainer };
+};
+```
 
-## Learn More
+- 通过函数返回一个包含`Provider`和`useContainer`的对象
+- Provider 接受 init 初始值，去执行 **数据对象** 组件，通过 createElement 创造一个 Context.Provider 传值组件，并将 **数据对象** 组件返回的方法和状态保存到`value`，子节点不变，返回：
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```javascript
+<xxx.Provider value={方法，状态...}>{children}</xxx.Provider>
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- 通过`useContainer`拿到 当前 Context.Provider 中的 value 状态和方法 并返回
+
+---
+
+## 如何解决 Provider hell 🏁
+
+在 unstated-next 中由于每一个被处理为 **数据对象** 的组件想要被共享，都需要在最外层逐级包裹
+
+```javascript
+<Container1.Provider>
+  <Container2.Provider>
+    <Container3.Provider>MyApp</Container3.Provider>
+  </Container2.Provider>
+</Container1.Provider>
+```
+
+我们可以通过 类似 compose 函数进行处理，将所有 **数据对象** 组件通过 reduce 逐级叠加返回一个类似洋葱的 Provider，调用的时候只需要使用`Provider`包裹住业务组件
+
+```javascript
+export const composeProvider = (...commonFun) => ({ children }) => {
+  return commonFun.reduceRight((child, { init, Provider }) => {
+    return <Provider init={init}>{child}</Provider>;
+  }, children);
+};
+
+//进行调用
+const Provider = reduceProvider({ ...xxxState1, init: 100 }, xxxState2);
+export default () => (
+  <Provider>
+    <ExamplePage1 />
+    <ExamplePage2 />
+    <ExamplePage3 />
+  </Provider>
+);
+```
+
+[查看完整代码](https://github.com/blazer233/unstated-next)
+
+大功告成！
+
+## 总结 💢
+
+总结
+
+其实 unstated-next 实现很简单，通俗来讲就是一个闭包，使用于简单的业务场景，且写法过于灵活，一旦遇到 class 的情况，就又要回到旧的写法，所以只能说有利有弊
+
+至此，谢谢各位在百忙之中点开这篇文章，希望对你们能有所帮助，相信你对 react 中的错误边界有了大概的认实，也会编写一个简单的`ErrorBoundary`总的来说优化的点还有很多，如有问题欢迎各位大佬指正。
+
+- 👋：[跳转 github](https://github.com/blazer233/unstated-next)
+
+## 参考文献
+
+- 🍑：[unstated-next](https://github.com/jamiebuilds/unstated-next)
+- 🍑：[React hooks，组合与抽象，状态管理](https://zhuanlan.zhihu.com/p/114034495)
+- 🍑：[精读《unstated 与 unstated-next 源码》](https://zhuanlan.zhihu.com/p/93500556)
+- 🍑：[React 轻量状态管理库 unstated-next 使用教程](https://www.jianshu.com/p/f5d0d777b523)
+
+求个 star，谢谢大家了
