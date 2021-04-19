@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import CounterContainer from "../state/CounterContainer";
 import TodoListContainer from "../state/TodoListContainer";
 
 export default function TodoListPage() {
-  const counter: any = CounterContainer.useContainer();
-  const todoList: any = TodoListContainer.useContainer();
+  const counter = CounterContainer.useContainer();
+  const todoList = TodoListContainer.useContainer() || [];
   const [inputValue, setInputValue] = useState("");
-  console.log("--清单渲染 render--");
+  console.log("--清单渲染 render--", todoList);
   const addItem = () => {
     counter.increment();
     let item = { id: counter.count, title: inputValue };
@@ -37,18 +37,13 @@ export default function TodoListPage() {
         </span>
       </div>
 
-      {todoList?.todoList?.map(
-        (item: { id: number; title: React.ReactNode }) => (
-          <ul key={item.id + 10}>
-            <li
-              onClick={() => todoList.del(item)}
-              style={{ cursor: "pointer" }}
-            >
-              {item.title}
-            </li>
-          </ul>
-        )
-      )}
+      {todoList.todoList.map(item => (
+        <ul key={item.id + 10}>
+          <li onClick={() => todoList.del(item)} style={{ cursor: "pointer" }}>
+            {item.title}
+          </li>
+        </ul>
+      ))}
     </div>
   );
 }

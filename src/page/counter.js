@@ -2,7 +2,7 @@ import React from "react";
 import CounterContainer from "../state/CounterContainer";
 
 export default () => {
-  let counter: any = CounterContainer.useContainer();
+  let counter = CounterContainer.useContainer();
   console.log("数字变化 render");
   return (
     <div>

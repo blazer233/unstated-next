@@ -1,8 +1,8 @@
 import { createContext, createElement, useContext } from "react";
 
-export default (useHook: (arg0: any) => any) => {
-  const Context = createContext<any>(null); //创建共享功能
-  const Provider = ({ init, children }: any) => {
+export default useHook => {
+  const Context = createContext(); //创建共享功能
+  const Provider = ({ init, children }) => {
     const value = useHook(init); //共享数据和共享方法的对象
     return createElement(Context.Provider, { value }, children);
   };
