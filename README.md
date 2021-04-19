@@ -1,10 +1,10 @@
-# 不到 20 行仿写一个 unstated-next 🎅
+# 20 行简单实现一个 unstated-next 🎅
 
 ## 前言 📝
 
 > 👉 [unstated-next](https://github.com/jamiebuilds/unstated-next) 基于 React 心智模型(hook+context)而设计的状态管理。 👈
 
-![Alt](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/914cba218a7e415eafc5feddcf9454dc~tplv-k3u1fbpfcp-zoom-1.image)
+![Alt](https://raw.githubusercontent.com/blazer233/unstated-next/main/public/temp1.jpg)
 
 在 react hook 出现之前，有基于单一数据源，使用纯函数修改状态的 redux & react-redux 也有基于 Object.defineProperty 和 Proxy 来进行数据拦截访问的 mobx ，但伴随着 react 16.8 的出现，我们可以基于自带的 hook 去实现状态管理也就是 unstated-next
 
@@ -125,7 +125,7 @@ export default () => (
 
 总结
 
-其实 unstated-next 实现很简单，通俗来讲就是一个闭包，使用于简单的业务场景，且写法过于灵活，一旦遇到 class 的情况，就又要回到旧的写法，所以只能说有利有弊
+其实 unstated-next 实现很简单，通俗来讲就是一个闭包，使用于简单的业务场景，且写法过于灵活，一旦遇到 class 组件的情况，就又要回到旧的写法，所以只能说有利有弊
 
 至此，谢谢各位在百忙之中点开这篇文章，希望对你们能有所帮助，相信你对 react 中的错误边界有了大概的认实，也会编写一个简单的`ErrorBoundary`总的来说优化的点还有很多，如有问题欢迎各位大佬指正。
 
